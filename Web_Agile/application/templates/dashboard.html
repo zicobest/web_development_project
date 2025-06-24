@@ -1,0 +1,156 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-end mb-3">
+  <a href="{{ url_for('dashboard_pdf') }}" class="btn btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Create PDF">
+    <i class="me-1">📄</i><span class="visually-hidden">Create PDF</span>
+  </a>
+</div>
+<div class="container mt-4">
+
+
+    <!-- Monthly Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-white bg-success mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Total Income</h5>
+                    <p class="card-text">€ {{ total_income }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-danger mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Total Expense</h5>
+                    <p class="card-text">€ {{ total_expense }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-primary mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Net Balance</h5>
+                    <p class="card-text">€ {{ net_balance }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart Row -->
+    <div class="row">
+        <!-- Income vs Expense -->
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Income vs Expense</h5>
+                    <div style="position: relative; height: 220px; width: 100%;">
+                        <canvas id="income_vs_expense"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Expenses Over Time -->
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Expenses Over Time</h5>
+                    <div style="position: relative; height: 220px; width: 100%;">
+                        <canvas id="expenses_over_time"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Breakdown -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Category Breakdown</h5>
+                    <div style="position: relative; height: 280px; width: 100%;">
+                        <canvas id="category_breakdown"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+try {
+    const income_vs_expenses = {{ income_vs_expenses | tojson }};
+    const labels = {{ dates_labels | tojson }};
+    const amount = {{ over_time_expenditure | tojson }};
+    const category_labels = {{ category_labels | tojson }};
+    const category_totals = {{ category_totals | tojson }};
+
+    // Pie Chart: Income vs Expense
+    new Chart(document.getElementById("income_vs_expense"), {
+        type: 'pie',
+        data: {
+            labels: ['Expense', 'Income'],
+            datasets: [{
+                data: income_vs_expenses,
+                backgroundColor: ['#E16851', '#60BD68']
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'right' }
+            }
+        }
+    });
+
+    // Line Chart: Expenses Over Time
+    new Chart(document.getElementById("expenses_over_time"), {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: "Expenditure Over Time in €",
+                data: amount,
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.3,
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true
+        }
+    });
+
+    // Bar Chart: Category Breakdown
+    new Chart(document.getElementById("category_breakdown"), {
+        type: 'bar',
+        data: {
+            labels: category_labels,
+            datasets: [{
+                label: "Total by Category (€)",
+                data: category_totals,
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+} catch (err) {
+    console.error("Chart rendering failed:", err);
+}
+</script>
+{% endblock %}

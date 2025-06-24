@@ -1,0 +1,91 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="col-xs-10 col-sm-6 col-md-6 ml-auto mr-auto">
+    <h2>Update Financial Report</h2>
+    <div class="card card-style mb-2">
+        <div class="card-body">
+            <form action="" method="POST">
+                {{ form.csrf_token() }}
+                <fieldset class="form-group">
+                    <legend class="mb-4">Update Report for Entry #{{ entry.id }}</legend>
+
+                    <div class="form-group">
+                        {{ form.amount.label(class="form-control-label") }}
+                        {{ form.amount(class="form-control form-control-sm") }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.type.label(class="form-control-label") }}
+                        {{ form.type(class="form-control form-control-sm", id="type_select") }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.category.label(class="form-control-label") }}
+                        {{ form.category(class="form-control form-control-sm", id="category_select") }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.revenue.label(class="form-control-label") }}
+                        {{ form.revenue(class="form-control form-control-sm", id="revenue_input") }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.date.label(class="form-control-label") }}
+                        {{ form.date(class="form-control form-control-sm") }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.submit(class="btn btn-outline-success w-50", value="Update") }}
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const typeSelect = document.getElementById('type_select');
+        const revenueInput = document.getElementById('revenue_input');
+        const categorySelect = document.getElementById('category_select');
+
+        const currentCategory = "{{ form.category.data }}";  // Preselected category from the backend
+
+        function toggleRevenueInputAndUpdateCategories() {
+            const selectedType = typeSelect.value === 'Expense' ? 'expense' : 'income';
+
+            // Toggle revenue field
+            revenueInput.disabled = (selectedType === 'expense');
+
+            // Fetch and update categories
+            fetch(`/flexible_categories/${selectedType}`)
+                .then(response => response.json())
+                .then(data => {
+                    categorySelect.innerHTML = ''; // Clear existing options
+
+                    const placeholder = document.createElement('option');
+                    placeholder.textContent = '-- Select Category --';
+                    placeholder.value = '';
+                    categorySelect.appendChild(placeholder);
+
+                    data.forEach(([value, label]) => {
+                        const option = document.createElement('option');
+                        option.value = value;
+                        option.textContent = label;
+                        if (value === currentCategory) {
+                            option.selected = true;
+                        }
+                        categorySelect.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching categories:', error);
+                });
+        }
+
+        typeSelect.addEventListener('change', toggleRevenueInputAndUpdateCategories);
+        toggleRevenueInputAndUpdateCategories(); // Run once on page load
+    });
+</script>
+{% endblock %}

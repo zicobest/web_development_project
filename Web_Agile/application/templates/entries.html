@@ -1,0 +1,38 @@
+{%extends 'layout.html'%}
+
+{%block content%} <!--This is the content block where the specific page content will be inserted-->
+
+<div class="col-sm-10 ml-auto mr-auto ">
+    <H2>Income payment and Expenses History</H2>
+    <table class="table">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Date</th>
+                <th scope="col">Type</th>
+                <th scope="col">Category</th>
+                <th scope="col">Revenue</th>
+                <th scope="col">Amount</th>
+                <th scope="col">Update</th>
+                <th scope="col">Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in entries %}
+                    <tr>
+                        <th scope="row">{{loop.index}}</th>
+                        <td>{{entry.date.strftime("%m-%d-%Y")}}</td>
+                        <td>{{entry.type}}</td>
+                        <td>{{ entry.category }}</td>
+                        <td>{{ entry.revenue}}</td>
+                        <td>{{ entry.amount }}</td>
+                        <td><a href="{{ url_for('update_entry', entry_id=entry.id) }}" class="btn btn-outline-primary btn-sm">Update</a></td>
+                        <td><a href="{{ url_for('delete', entry_id= entry.id) }}" class="btn btn-outline-danger btn-sm">Delete</a></td>
+
+                    </tr>
+            {% endfor %}
+    </tbody>
+    </table>
+</div>
+{% endblock %}
+
